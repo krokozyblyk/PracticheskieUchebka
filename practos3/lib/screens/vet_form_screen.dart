@@ -1,0 +1,167 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+
+import '../logic/validators.dart';
+import '../models/category.dart' as model;
+import '../models/list_query.dart';
+import '../models/vet.dart';
+import '../repositories/category_repository.dart';
+import '../repositories/vet_repository.dart';
+import '../state/entity_list_notifier.dart';
+import '../widgets/entity_form.dart';
+
+class VetFormScreen extends StatefulWidget {
+  final int? id;
+
+  const VetFormScreen({super.key, this.id});
+
+  bool get isEditing => id != null;
+
+  @override
+  State<VetFormScreen> createState() => _VetFormScreenState();
+}
+
+class _VetFormScreenState extends State<VetFormScreen> {
+  final _formKey = GlobalKey<EntityFormState>();
+  Vet? _vet;
+  List<model.Category> _categories = [];
+  bool _loading = true;
+  bool _notFound = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final categoryRepository = context.read<CategoryRepository>();
+    final vetRepository = context.read<VetRepository>();
+    final categories = await categoryRepository.find(const ListQuery(size: 1000));
+    Vet? vet;
+    if (widget.id != null) {
+      vet = await vetRepository.findById(widget.id!);
+    }
+    if (!mounted) return;
+    setState(() {
+      _categories = categories.items;
+      _vet = vet;
+      _notFound = widget.id != null && vet == null;
+      _loading = false;
+    });
+  }
+
+  Future<void> _save() async {
+    final form = _formKey.currentState;
+    if (form == null) return;
+    final vet = Vet(
+      id: _vet?.id ?? 0,
+      fullName: form.textValue('fullName'),
+      specializationCategoryId:
+          form.dropdownValue<int>('specializationCategoryId') ?? 0,
+      phone: form.textValue('phone'),
+      email: form.textValue('email'),
+    );
+    final repository = context.read<VetRepository>();
+    final listNotifier = context.read<EntityListNotifier<Vet>>();
+    if (widget.isEditing) {
+      await repository.update(vet);
+    } else {
+      await repository.create(vet);
+    }
+    await listNotifier.load();
+    _close();
+  }
+
+  void _close() {
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go('/vets');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          tooltip: 'Назад',
+          onPressed: () => _formKey.currentState?.requestExit(),
+        ),
+        title: Text(
+          widget.isEditing ? 'Редактирование ветеринара' : 'Новый ветеринар',
+        ),
+      ),
+      body: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_notFound) {
+      return const Center(child: Text('Ветеринар не найден'));
+    }
+    final vet = _vet;
+    final specializationIds = _categories.map((c) => c.id).toSet();
+    final initialSpecialization =
+        specializationIds.contains(vet?.specializationCategoryId)
+            ? vet?.specializationCategoryId
+            : null;
+
+    return EntityForm(
+      key: _formKey,
+      fields: [
+        TextFieldSpec(
+          key: 'fullName',
+          label: 'ФИО',
+          initialValue: vet?.fullName ?? '',
+          validator: combineValidators([
+            (value) => requiredValidator(value),
+            lengthValidator(3, 60),
+          ]),
+        ),
+        DropdownFieldSpec<int>(
+          key: 'specializationCategoryId',
+          label: 'Специализация',
+          initialValue: initialSpecialization,
+          items: _categories
+              .map((category) => DropdownMenuItem<int>(
+                    value: category.id,
+                    child: Text(category.name),
+                  ))
+              .toList(),
+          validator: (value) =>
+              value == null ? 'Выберите специализацию' : null,
+        ),
+        TextFieldSpec(
+          key: 'phone',
+          label: 'Телефон',
+          initialValue: vet?.phone ?? '',
+          keyboardType: TextInputType.phone,
+          validator: combineValidators([
+            (value) => requiredValidator(value),
+            phoneValidator,
+          ]),
+        ),
+        TextFieldSpec(
+          key: 'email',
+          label: 'Почта',
+          initialValue: vet?.email ?? '',
+          keyboardType: TextInputType.emailAddress,
+          validator: combineValidators([
+            (value) => requiredValidator(value),
+            emailValidator,
+          ]),
+        ),
+      ],
+      submitLabel: widget.isEditing ? 'Сохранить' : 'Создать',
+      onSubmit: _save,
+      onCancel: _close,
+    );
+  }
+}

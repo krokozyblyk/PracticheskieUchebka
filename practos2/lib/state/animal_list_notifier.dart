@@ -17,6 +17,8 @@ class AnimalListNotifier extends ChangeNotifier {
   LoadStatus _status = LoadStatus.idle;
   String? _error;
   final Set<int> _selected = {};
+  bool _loading = false;
+  bool _reloadQueued = false;
 
   AnimalQuery get query => _query;
   PageResult<Animal> get result => _result;
@@ -26,20 +28,36 @@ class AnimalListNotifier extends ChangeNotifier {
   bool get hasSelection => _selected.isNotEmpty;
 
   Future<void> load() async {
-    _status = LoadStatus.loading;
-    _error = null;
-    notifyListeners();
-    try {
-      _result = await _repository.find(_query);
-      _status = LoadStatus.success;
-    } catch (e) {
-      _error = 'Не удалось загрузить список: $e';
-      _status = LoadStatus.error;
+    if (_loading) {
+      _reloadQueued = true;
+      return;
     }
-    notifyListeners();
+    _loading = true;
+    try {
+      do {
+        _reloadQueued = false;
+        _status = LoadStatus.loading;
+        _error = null;
+        notifyListeners();
+        try {
+          final result = await _repository.find(_query);
+          if (_reloadQueued) continue;
+          _result = result;
+          _status = LoadStatus.success;
+        } catch (e) {
+          if (_reloadQueued) continue;
+          _error = 'Не удалось загрузить список: $e';
+          _status = LoadStatus.error;
+        }
+      } while (_reloadQueued);
+    } finally {
+      _loading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> applyQuery(AnimalQuery next) async {
+    if (_query == next) return;
     _query = next;
     _selected.clear();
     await load();

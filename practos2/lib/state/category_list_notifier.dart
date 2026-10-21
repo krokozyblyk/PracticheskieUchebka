@@ -21,6 +21,8 @@ class CategoryListNotifier extends ChangeNotifier {
   PageResult<model.Category> _result = PageResult.empty();
   LoadStatus _status = LoadStatus.idle;
   String? _error;
+  bool _loading = false;
+  bool _reloadQueued = false;
 
   String get search => _search;
   String get sortField => _sortField;
@@ -33,24 +35,39 @@ class CategoryListNotifier extends ChangeNotifier {
   String? get error => _error;
 
   Future<void> load() async {
-    _status = LoadStatus.loading;
-    _error = null;
-    notifyListeners();
-    try {
-      _result = await _repository.find(
-        search: _search,
-        sortField: _sortField,
-        sortAscending: _sortAscending,
-        page: _page,
-        size: _size,
-        includeDeleted: _includeDeleted,
-      );
-      _status = LoadStatus.success;
-    } catch (e) {
-      _error = 'Не удалось загрузить список: $e';
-      _status = LoadStatus.error;
+    if (_loading) {
+      _reloadQueued = true;
+      return;
     }
-    notifyListeners();
+    _loading = true;
+    try {
+      do {
+        _reloadQueued = false;
+        _status = LoadStatus.loading;
+        _error = null;
+        notifyListeners();
+        try {
+          final result = await _repository.find(
+            search: _search,
+            sortField: _sortField,
+            sortAscending: _sortAscending,
+            page: _page,
+            size: _size,
+            includeDeleted: _includeDeleted,
+          );
+          if (_reloadQueued) continue;
+          _result = result;
+          _status = LoadStatus.success;
+        } catch (e) {
+          if (_reloadQueued) continue;
+          _error = 'Не удалось загрузить список: $e';
+          _status = LoadStatus.error;
+        }
+      } while (_reloadQueued);
+    } finally {
+      _loading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> setSearch(String value) async {
