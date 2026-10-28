@@ -1,0 +1,51 @@
+name: practos6-pages
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'practos6/**'
+      - '.github/workflows/practos6-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: practos6
+        run: flutter pub get
+
+      - name: Build web release
+        working-directory: practos6
+        run: >
+          flutter build web --release
+          --base-href /PracticheskieUchebka/
+          --dart-define=API_BASE_URL=${{ vars.API_BASE_URL || 'http://localhost:8080/api' }}
+
+      - name: Strip unused renderer files
+        run: node practos6/tool/strip_web_release.js practos6/build/web
+
+      - name: Prepare GitHub Pages files
+        run: |
+          cp practos6/build/web/index.html practos6/build/web/404.html
+          touch practos6/build/web/.nojekyll
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: practos6/build/web
+          publish_branch: gh-pages
+          force_orphan: true
