@@ -22,6 +22,12 @@ List<NavItem> navItemsFor(Role role) {
     const NavItem('Категории', Icons.category_outlined, '/categories'),
     const NavItem('Поставщики', Icons.local_shipping_outlined, '/suppliers'),
     const NavItem('Ветеринары', Icons.medical_services_outlined, '/vets'),
+    if (role.can(Permission.manageOrders))
+      const NavItem('Заказы', Icons.shopping_cart_outlined, '/orders'),
+    if (role.can(Permission.manageAppointments))
+      const NavItem('Записи', Icons.event_available_outlined, '/appointments'),
+    if (role.can(Permission.manageReviews))
+      const NavItem('Мои отзывы', Icons.star_outline, '/reviews'),
     if (role.can(Permission.manageCatalog))
       const NavItem('Покупатели', Icons.groups_outlined, '/customers'),
     if (role.can(Permission.viewProfile))

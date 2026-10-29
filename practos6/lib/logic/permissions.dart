@@ -9,15 +9,24 @@ enum Permission {
   manageUsers,
   viewStats,
   viewProfile,
+  manageOrders,
+  manageAppointments,
+  manageReviews,
 }
 
 extension RolePermissions on Role {
   Set<Permission> get permissions => switch (this) {
-    Role.customer => {Permission.viewCatalog, Permission.viewProfile},
+    Role.customer => {
+      Permission.viewCatalog,
+      Permission.viewProfile,
+      Permission.manageReviews,
+    },
     Role.specialist => {
       Permission.viewCatalog,
       Permission.manageCatalog,
       Permission.deleteSoft,
+      Permission.manageOrders,
+      Permission.manageAppointments,
     },
     Role.admin => {
       Permission.viewCatalog,
@@ -32,6 +41,11 @@ extension RolePermissions on Role {
 }
 
 bool canOpenPath(Role role, String path) {
+  if (path.startsWith('/orders')) return role.can(Permission.manageOrders);
+  if (path.startsWith('/appointments')) {
+    return role.can(Permission.manageAppointments);
+  }
+  if (path.startsWith('/reviews')) return role.can(Permission.manageReviews);
   if (path == '/users' || path == '/statistics') {
     return role.can(Permission.manageUsers);
   }

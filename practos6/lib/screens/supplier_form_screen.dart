@@ -90,11 +90,11 @@ class _SupplierFormScreenState extends State<SupplierFormScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      title: widget.isEditing ? '?????????????? ??????????' : '????? ?????????',
+      title: widget.isEditing ? 'Редактирование поставщика' : 'Новый поставщик',
       currentPath: '/suppliers',
       showNavigation: false,
       leading: IconButton(
-        tooltip: '?????',
+        tooltip: 'Назад',
         icon: const Icon(Icons.arrow_back),
         onPressed: () => _formKey.currentState?.requestExit(),
       ),

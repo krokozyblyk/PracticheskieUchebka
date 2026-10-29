@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../logic/permissions.dart';
+import '../models/list_query.dart';
 import '../state/auth_notifier.dart';
 import '../state/list_controller.dart';
 import '../state/load_status.dart';
 import 'api_error.dart';
 import 'app_navigation.dart';
 import 'entity_table.dart';
+import 'list_filter_bar.dart';
 import 'pagination_bar.dart';
 import 'search_field.dart';
 
@@ -24,6 +26,11 @@ class ListScaffold<T> extends StatelessWidget {
   final Future<int> Function(List<int> ids)? linkedCount;
   final String createLabel;
   final String emptyText;
+  final Permission? managePermission;
+  final Permission? deletePermission;
+  final List<ListFilterSpec> filters;
+  final ValueChanged<Map<String, String>>? onFiltersChanged;
+  final ListQuery Function()? queryOf;
 
   const ListScaffold({
     super.key,
@@ -37,6 +44,11 @@ class ListScaffold<T> extends StatelessWidget {
     required this.onOpen,
     required this.onEdit,
     this.linkedCount,
+    this.managePermission,
+    this.deletePermission,
+    this.filters = const [],
+    this.onFiltersChanged,
+    this.queryOf,
     this.createLabel = 'Добавить',
     this.emptyText = 'Ничего не найдено',
   });
@@ -180,9 +192,14 @@ class ListScaffold<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthNotifier>();
-    final canManage = auth.can(Permission.manageCatalog);
-    final canDelete = auth.can(Permission.deleteSoft);
-    final canAdmin = auth.can(Permission.deleteHard);
+    final canManage = managePermission == null
+        ? auth.can(Permission.manageCatalog)
+        : auth.can(managePermission!);
+    final canDelete = deletePermission == null
+        ? auth.can(Permission.deleteSoft)
+        : auth.can(deletePermission!);
+    final canAdmin =
+        deletePermission == null && auth.can(Permission.deleteHard);
 
     return AnimatedBuilder(
       animation: controller,
@@ -199,6 +216,14 @@ class ListScaffold<T> extends StatelessWidget {
                   initialValue: controller.search,
                   onChanged: controller.setSearch,
                 ),
+                if (filters.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  ListFilterBar(
+                    specs: filters,
+                    initialValues: queryOf?.call().filters ?? const {},
+                    onChanged: (values) => onFiltersChanged?.call(values),
+                  ),
+                ],
                 const SizedBox(height: 12),
                 Wrap(
                   spacing: 12,
@@ -257,9 +282,14 @@ class ListScaffold<T> extends StatelessWidget {
 
   Widget _buildBody(BuildContext context) {
     final auth = context.watch<AuthNotifier>();
-    final canManage = auth.can(Permission.manageCatalog);
-    final canDelete = auth.can(Permission.deleteSoft);
-    final canAdmin = auth.can(Permission.deleteHard);
+    final canManage = managePermission == null
+        ? auth.can(Permission.manageCatalog)
+        : auth.can(managePermission!);
+    final canDelete = deletePermission == null
+        ? auth.can(Permission.deleteSoft)
+        : auth.can(deletePermission!);
+    final canAdmin =
+        deletePermission == null && auth.can(Permission.deleteHard);
 
     switch (controller.status) {
       case LoadStatus.idle:

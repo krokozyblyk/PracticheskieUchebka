@@ -32,6 +32,27 @@ class DashboardScreen extends StatelessWidget {
         'Просмотр списка, поиск и фильтры',
         '/animals',
       ),
+      if (user.role.can(Permission.manageOrders))
+        const _Section(
+          Icons.shopping_cart_outlined,
+          'Заказы',
+          'Оформление и учёт продаж',
+          '/orders',
+        ),
+      if (user.role.can(Permission.manageAppointments))
+        const _Section(
+          Icons.event_available_outlined,
+          'Записи к ветеринару',
+          'Расписание и контроль пересечений',
+          '/appointments',
+        ),
+      if (user.role.can(Permission.manageReviews))
+        const _Section(
+          Icons.star_outline,
+          'Мои отзывы',
+          'Оценки и комментарии о животных',
+          '/reviews',
+        ),
       if (user.role.can(Permission.viewProfile))
         const _Section(
           Icons.badge_outlined,

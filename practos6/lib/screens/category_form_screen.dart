@@ -90,11 +90,11 @@ class _CategoryFormScreenState extends State<CategoryFormScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      title: widget.isEditing ? '?????????????? ?????????' : '????? ?????????',
+      title: widget.isEditing ? 'Редактирование категории' : 'Новая категория',
       currentPath: '/categories',
       showNavigation: false,
       leading: IconButton(
-        tooltip: '?????',
+        tooltip: 'Назад',
         icon: const Icon(Icons.arrow_back),
         onPressed: () => _formKey.currentState?.requestExit(),
       ),

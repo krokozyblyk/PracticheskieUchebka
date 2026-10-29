@@ -23,6 +23,8 @@ class DetailScaffold extends StatelessWidget {
   final Future<void> Function()? onDelete;
   final Future<void> Function()? onRestore;
   final Future<void> Function()? onHardDelete;
+  final Permission? managePermission;
+  final Permission? deletePermission;
   final Widget? extra;
 
   const DetailScaffold({
@@ -35,6 +37,8 @@ class DetailScaffold extends StatelessWidget {
     this.onDelete,
     this.onRestore,
     this.onHardDelete,
+    this.managePermission,
+    this.deletePermission,
     this.extra,
   });
 
@@ -79,9 +83,14 @@ class DetailScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthNotifier>();
-    final canManage = auth.can(Permission.manageCatalog);
-    final canDelete = auth.can(Permission.deleteSoft);
-    final canAdmin = auth.can(Permission.deleteHard);
+    final canManage = managePermission == null
+        ? auth.can(Permission.manageCatalog)
+        : auth.can(managePermission!);
+    final canDelete = deletePermission == null
+        ? auth.can(Permission.deleteSoft)
+        : auth.can(deletePermission!);
+    final canAdmin =
+        deletePermission == null && auth.can(Permission.deleteHard);
 
     return AppScaffold(
       title: title,

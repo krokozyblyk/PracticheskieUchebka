@@ -4,6 +4,9 @@ import 'logic/permissions.dart';
 import 'screens/animal_detail_screen.dart';
 import 'screens/animal_form_screen.dart';
 import 'screens/animal_list_screen.dart';
+import 'screens/appointment_detail_screen.dart';
+import 'screens/appointment_form_screen.dart';
+import 'screens/appointment_list_screen.dart';
 import 'screens/category_detail_screen.dart';
 import 'screens/category_form_screen.dart';
 import 'screens/category_list_screen.dart';
@@ -14,8 +17,14 @@ import 'screens/dashboard_screen.dart';
 import 'screens/forbidden_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/not_found_screen.dart';
+import 'screens/order_detail_screen.dart';
+import 'screens/order_form_screen.dart';
+import 'screens/order_list_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/register_screen.dart';
+import 'screens/review_detail_screen.dart';
+import 'screens/review_form_screen.dart';
+import 'screens/review_list_screen.dart';
 import 'screens/statistics_screen.dart';
 import 'screens/supplier_detail_screen.dart';
 import 'screens/supplier_form_screen.dart';
@@ -115,7 +124,8 @@ GoRouter buildRouter(AuthNotifier auth) {
       GoRoute(
         path: '/categories',
         name: 'categories',
-        builder: (context, state) => const CategoryListScreen(),
+        builder: (context, state) =>
+            CategoryListScreen(queryParameters: state.uri.queryParameters),
       ),
       GoRoute(
         path: '/categories/new',
@@ -141,7 +151,8 @@ GoRouter buildRouter(AuthNotifier auth) {
       GoRoute(
         path: '/suppliers',
         name: 'suppliers',
-        builder: (context, state) => const SupplierListScreen(),
+        builder: (context, state) =>
+            SupplierListScreen(queryParameters: state.uri.queryParameters),
       ),
       GoRoute(
         path: '/suppliers/new',
@@ -167,7 +178,8 @@ GoRouter buildRouter(AuthNotifier auth) {
       GoRoute(
         path: '/vets',
         name: 'vets',
-        builder: (context, state) => const VetListScreen(),
+        builder: (context, state) =>
+            VetListScreen(queryParameters: state.uri.queryParameters),
       ),
       GoRoute(
         path: '/vets/new',
@@ -193,7 +205,8 @@ GoRouter buildRouter(AuthNotifier auth) {
       GoRoute(
         path: '/customers',
         name: 'customers',
-        builder: (context, state) => const CustomerListScreen(),
+        builder: (context, state) =>
+            CustomerListScreen(queryParameters: state.uri.queryParameters),
       ),
       GoRoute(
         path: '/customers/new',
@@ -214,6 +227,87 @@ GoRouter buildRouter(AuthNotifier auth) {
         builder: (context, state) {
           final id = int.tryParse(state.pathParameters['id'] ?? '');
           return CustomerFormScreen(id: id);
+        },
+      ),
+      GoRoute(
+        path: '/orders',
+        name: 'orders',
+        builder: (context, state) =>
+            OrderListScreen(queryParameters: state.uri.queryParameters),
+      ),
+      GoRoute(
+        path: '/orders/new',
+        name: 'orderCreate',
+        builder: (context, state) => const OrderFormScreen(),
+      ),
+      GoRoute(
+        path: '/orders/:id',
+        name: 'orderDetail',
+        builder: (context, state) {
+          final id = int.tryParse(state.pathParameters['id'] ?? '') ?? 0;
+          return OrderDetailScreen(id: id);
+        },
+      ),
+      GoRoute(
+        path: '/orders/:id/edit',
+        name: 'orderEdit',
+        builder: (context, state) {
+          final id = int.tryParse(state.pathParameters['id'] ?? '');
+          return OrderFormScreen(id: id);
+        },
+      ),
+      GoRoute(
+        path: '/appointments',
+        name: 'appointments',
+        builder: (context, state) =>
+            AppointmentListScreen(queryParameters: state.uri.queryParameters),
+      ),
+      GoRoute(
+        path: '/appointments/new',
+        name: 'appointmentCreate',
+        builder: (context, state) => const AppointmentFormScreen(),
+      ),
+      GoRoute(
+        path: '/appointments/:id',
+        name: 'appointmentDetail',
+        builder: (context, state) {
+          final id = int.tryParse(state.pathParameters['id'] ?? '') ?? 0;
+          return AppointmentDetailScreen(id: id);
+        },
+      ),
+      GoRoute(
+        path: '/appointments/:id/edit',
+        name: 'appointmentEdit',
+        builder: (context, state) {
+          final id = int.tryParse(state.pathParameters['id'] ?? '');
+          return AppointmentFormScreen(id: id);
+        },
+      ),
+      GoRoute(
+        path: '/reviews',
+        name: 'reviews',
+        builder: (context, state) =>
+            ReviewListScreen(queryParameters: state.uri.queryParameters),
+      ),
+      GoRoute(
+        path: '/reviews/new',
+        name: 'reviewCreate',
+        builder: (context, state) => const ReviewFormScreen(),
+      ),
+      GoRoute(
+        path: '/reviews/:id',
+        name: 'reviewDetail',
+        builder: (context, state) {
+          final id = int.tryParse(state.pathParameters['id'] ?? '') ?? 0;
+          return ReviewDetailScreen(id: id);
+        },
+      ),
+      GoRoute(
+        path: '/reviews/:id/edit',
+        name: 'reviewEdit',
+        builder: (context, state) {
+          final id = int.tryParse(state.pathParameters['id'] ?? '');
+          return ReviewFormScreen(id: id);
         },
       ),
     ],

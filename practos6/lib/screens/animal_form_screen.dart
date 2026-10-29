@@ -166,7 +166,7 @@ class _AnimalFormScreenState extends State<AnimalFormScreen> {
       currentPath: '/animals',
       showNavigation: false,
       leading: IconButton(
-        tooltip: '?????',
+        tooltip: 'Назад',
         icon: const Icon(Icons.arrow_back),
         onPressed: () => _formKey.currentState?.requestExit(),
       ),

@@ -122,7 +122,132 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
               ),
           ],
         ),
+        const SizedBox(height: 24),
+        _buildDomainMetrics(context),
       ],
+    );
+  }
+
+  Widget _buildDomainMetrics(BuildContext context) {
+    final metrics = _stats!.metrics;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Продажи и отзывы', style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            _MetricCard(
+              title: 'Выручка',
+              value: '${metrics.revenue.toStringAsFixed(0)} ₽',
+            ),
+            _MetricCard(title: 'Заказов', value: '${metrics.orders}'),
+            _MetricCard(
+              title: 'Средняя оценка',
+              value: metrics.averageRating.toStringAsFixed(1),
+            ),
+            _MetricCard(title: 'Отзывов', value: '${metrics.reviews}'),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 16,
+          runSpacing: 16,
+          children: [
+            SizedBox(
+              width: 420,
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Топ животных по продажам',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      if (metrics.topAnimals.isEmpty)
+                        const Text('Пока нет продаж'),
+                      for (final item in metrics.topAnimals)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            children: [
+                              Expanded(child: Text(item.name)),
+                              Text('${item.quantity} шт.'),
+                              const SizedBox(width: 12),
+                              Text('${item.revenue.toStringAsFixed(0)} ₽'),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 420,
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Низкие остатки',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      if (metrics.lowStock.isEmpty)
+                        const Text('Все позиции в наличии'),
+                      for (final item in metrics.lowStock)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            children: [
+                              Expanded(child: Text(item.name)),
+                              Text('${item.quantity} шт.'),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _MetricCard extends StatelessWidget {
+  final String title;
+  final String value;
+
+  const _MetricCard({required this.title, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 220,
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              Text(value, style: Theme.of(context).textTheme.headlineSmall),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

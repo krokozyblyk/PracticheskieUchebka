@@ -126,12 +126,12 @@ class _CustomerFormScreenState extends State<CustomerFormScreen> {
   Widget build(BuildContext context) {
     return AppScaffold(
       title: widget.isEditing
-          ? '?????????????? ??????????'
-          : '????? ??????????',
+          ? 'Редактирование покупателя'
+          : 'Новый покупатель',
       currentPath: '/customers',
       showNavigation: false,
       leading: IconButton(
-        tooltip: '?????',
+        tooltip: 'Назад',
         icon: const Icon(Icons.arrow_back),
         onPressed: () => _formKey.currentState?.requestExit(),
       ),

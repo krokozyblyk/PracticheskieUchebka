@@ -28,6 +28,7 @@ abstract class ApiRepositoryBase<T> {
     'page': query.page,
     'size': query.size,
     if (query.includeDeleted) 'includeDeleted': true,
+    ...query.filters,
   };
 
   PageResult<T> pageFrom(Map<String, dynamic> data) {

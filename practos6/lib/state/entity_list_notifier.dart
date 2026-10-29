@@ -91,7 +91,6 @@ class EntityListNotifier<T> extends ChangeNotifier
   }
 
   Future<void> applyQuery(ListQuery next) async {
-    if (_query == next) return;
     _query = next;
     _selected.clear();
     await load();
@@ -118,6 +117,9 @@ class EntityListNotifier<T> extends ChangeNotifier
   @override
   Future<void> setIncludeDeleted(bool value) =>
       applyQuery(_query.copyWith(includeDeleted: value));
+
+  Future<void> applyFilters(Map<String, String> filters) =>
+      applyQuery(_query.copyWith(filters: filters));
 
   @override
   void toggleSelection(int id) {
